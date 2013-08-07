@@ -1,0 +1,37 @@
+{
+    "name": "x",
+    "version": "0.0.0",
+    "description": "A simple library for study",
+    "main": "null",
+    "directories": {
+        "doc": "docs",
+        "example": "examples",
+        "test": "test"
+    },
+    "scripts": {
+        "test": "make test",
+        "build": "make build",
+        "min": "make min"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Exodia/x.git"
+    },
+    "keywords": [
+        "x"
+    ],
+    "devDependencies": {
+        "jsmin": "latest",
+        "jslint": "latest",
+        "uglify-js": "latest",
+        "mocha": "latest",
+        "expectjs": "latest",
+        "benchmark": "latest"
+    },
+    "author": "Exodia",
+    "email": "d_xinxin@163.com",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Exodia/x/issues"
+    }
+}
