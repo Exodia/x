@@ -1,0 +1,7 @@
+*.swp
+*.swo
+*.DS_Store
+*.pid
+test-report.html
+tmp/
+node_modules/
