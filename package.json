@@ -26,6 +26,8 @@
         "uglify-js": "latest",
         "mocha": "latest",
         "expectjs": "latest",
+        "karma": "latest",
+        "karma-mocha": "latest",
         "benchmark": "latest"
     },
     "author": "Exodia",

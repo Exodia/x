@@ -2,6 +2,6 @@
 *.swo
 *.DS_Store
 *.pid
-test-report.html
+coverage.html
 tmp/
 node_modules/

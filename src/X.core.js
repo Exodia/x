@@ -1,44 +1,37 @@
 ;
-(function (global, X) {
-    if (typeof global[X] === 'function') {
+(function (global, alias) {
+    if (typeof global[alias] === 'function') {
         return
     }
 
-    X = global[X] = function () {
+    var X = function () {
 
     }
 
     X.version = '0.0.0'
     X.__modules = {}
 
-    X.define = function (module, deps, factory) {
-        if (typeof define === 'function' && define.amd) {
-            define(module, deps, factory)
-
-            return
-        }
-
-        if (deps && deps.length) {
-            for (var i = 0; i < deps.length; ++i) {
-                deps[i] = X.__modules[deps[i]]
+    X.define = typeof define === 'function' && define.amd && define ||
+        function (module, deps, factory) {
+            if (deps && deps.length) {
+                for (var i = 0; i < deps.length; ++i) {
+                    deps[i] = X.__modules[deps[i]]
+                }
             }
+
+            X.__modules[module] = factory.apply(this, deps || [])
         }
-
-        X.__modules[module] = factory.apply(this, deps || [])
-    }
-
 
     if (typeof module === 'object' && typeof module.exports === 'object') {
-        exports.X = X
+        module.exports = X
+    } else if (typeof define !== 'function' || !define.amd) {
+        //no amd and no cmd, exposure alias to the global
+        global[alias] = X
+        global.define = X.define
     }
 
-    X.define('X.core', [], function () {
+    X.define(alias + '.core', [], function () {
         return X
     })
 
-    if (typeof define === 'undefined') {
-        global.define = X.define;
-    }
-
-
-}(this, 'X'))
+}(typeof global !== 'undefined' ? global : this, 'X'))
