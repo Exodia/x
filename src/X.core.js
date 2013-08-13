@@ -30,7 +30,7 @@
         global.define = X.define
     }
 
-    X.define(alias + '.core', [], function () {
+    X.define('X.core', [], function () {
         return X
     })
 
