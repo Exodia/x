@@ -1,21 +1,44 @@
 ;
 /**
- * X.class
+ * @class Class
+ * A simple implement of OO Class System
  *
- * @example
+ * See the example:
+ *      @example
+ *      //create a simple Super class
  *      var Super = X.Class.create({
- *          constructor: function(){
- *            this.prop1 = 1
- *            this.prop2 = 2
+ *          __initialize: function(prop1, prop2){
+ *            this.prop1 = prop1
+ *            this.prop2 = prop2
  *          },
  *          method1: function () {
- *               alert('super method1')
+ *               alert('Super method1')
  *          }
  *      })
  *
+ *      //create a Sub class which inherits the Super class
  *      var Sub = X.Class.create(Super, {
- *          constructor: function(){
+ *          __initialize: function(prop1, prop2, prop3){
+ *             //call the Super Class's "__initialize" method,
+ *             //and pass the prop1, prop2 as the arguments
+ *             this.$super('__initialize', prop1, prop2)
+ *             this.prop3 = prop3
+ *          }
+ *      })
  *
+ *      //if your code is not in strict mode, using this.$$super() method,
+ *      //you can call the parent's method of the same name so simply!
+ *
+ *      var Sub2 = X.Class.create(Sub, {
+ *          __initialize: function(prop1, prop2, prop3){
+ *             //call the Sub Class's "__initialize" method,
+ *             //and pass the prop1, prop2, prop3 as the arguments
+ *             this.$$super(prop1, prop2, prop3)
+ *          },
+ *          method1: function(){
+ *              //call the Sub's "method1" method
+ *              this.$$super()
+ *              alert('Sub2 method1')
  *          }
  *      })
  */
@@ -27,22 +50,52 @@ define('X.class', ['X.core'], function (X) {
             }
         }
 
+    /**
+     * Create an anonymous class
+     * usage: new X.Class(config)  or  X.Class.create(config)
+     * @constructor
+     * @return {X.Class}
+     */
     var Class = function () {
         return Class.create(slice.call(arguments))
     }
 
     apply(Class, {
+        /**
+         * Return a X.Class instance function, equal new Class(Super, overrides)
+         * @method X.Class
+         * @static
+         *
+         * @param {X.Class/Function} Super
+         * Optional, the parent class that this class extends, can be ignored.
+         *
+         * @param {Object} overrides
+         * A Class config, which will be added to the prototype of the Class,
+         * and shared by the Class instances!
+         * However, there are some special important config properties as follows:
+         *
+         * @param {Function} overrides.__initialize A initialize method.
+         * When creating a instance from a Class,
+         * this method will always be called just acts as the constructor
+         *
+         * @param {Object} overrides.__statics
+         * Every key and value in overrides.__statics will be added to the Class Object,
+         * just as the static properties.
+         * You can use the Class.prop to retrieve the static property.
+         *
+         * @returns {X.Class}
+         */
         create: function (Super, overrides) {
 
-            var kclass = Class.extend(Class)
+            var kclass = Class._extend(Class)
 
-            if (Super instanceof Class) {
-                kclass = Class.extend(kclass)
-                overrides = {}
+            if (typeof Super === 'function') {
+                kclass = Class._extend(Super)
+                overrides = overrides || {}
             } else if (typeof Super === 'object') {
                 overrides = Super
             } else {
-                throw new Error("Class create error: The first arguments should be an X.Class or Object")
+                throw new Error("Class create error: The first arguments should be an function or Object")
             }
 
             var proto = kclass.prototype,
@@ -53,22 +106,31 @@ define('X.class', ['X.core'], function (X) {
 
             //覆盖其余属性
             for (k in overrides) {
+                if (typeof overrides[k] === 'function') {
+                    overrides[k].__name__ = k
+                    overrides[k].__owner__ = kclass
+                }
                 k !== 'statics' && (proto[k] = overrides[k])
             }
 
+
             //覆盖静态属性
             for (k in overStatics) {
-                kclass[k] = overStatics[k]
-                protoStatics[k] = overStatics[k]
+                kclass[k] = protoStatics[k] = overStatics[k]
             }
 
             return kclass
-
-
         },
-        extend: function (superCls) {
+
+        /**
+         * used for X.Class.create method
+         * @private
+         * @param superCls
+         * @returns {X.Class}
+         * @private
+         */
+        _extend: function (superCls) {
             var kclass = function () {
-                this.$self = kclass
                 this.__initialize.apply(this, arguments)
             }
 
@@ -82,23 +144,92 @@ define('X.class', ['X.core'], function (X) {
 
             fn.prototype = superCls.prototype
             kclass.prototype = new fn
-            kclass.prototype.constructor = kclass
-            kclass.prototype.$super = superCls
-            kclass.prototype.__statics = {}
+            kclass.__super = superCls
 
-            if (typeof kclass.prototype.__initialize !== 'function') {
-                kclass.prototype.__initialize = function () {
-                }
+            apply(kclass.prototype, {
+                $self: kclass,
+                constructor: kclass,
+                __statics: {}
+            })
+
+            var statics = superCls.prototype.__statics
+
+            for (var k  in statics) {
+                kclass[k] = kclass.prototype.__statics[k] = statics[k]
             }
 
-            apply(kclass.prototype.__statics, superCls.prototype.__statics)
-
             return kclass
-
         }
-
     })
 
+    apply(Class.prototype, {
+        /**
+         * @property {X.Class} $self
+         *
+         * Get the reference to the current class from which this object was instantiated.
+         * `this.self` is scope-dependent and it's meant to be used for dynamic inheritance.
+         *
+         *      var Frog = X.Class({
+         *          __statics: {
+         *              name: 'Frog'         //Super.name = 'Frog'
+         *          },
+         *          getName: function(){
+         *              alert(this.$self.name)  //dependent on 'this'
+         *          }
+         *      })
+         *
+         *      var Dog = X.Class({
+         *          __statics: {
+         *              name: 'Dog'         //Super.name = 'Dog'
+         *          },
+         *          getName: function(){
+         *              alert(this.$self.name)  //dependent on 'this'
+         *          }
+         *      })
+         *
+         *      var frog = new Frog,
+         *          dog = new Dog
+         *
+         *      frog.getName()  //alerts 'Frog'
+         *      dog.getName()  //alerts 'Dog'
+         */
+        $self: Class,
+
+        __super: null,
+
+        __initialize: function () {
+        },
+
+        $super: function (method) {
+            var fn = this.__super.prototype[method]
+            if (typeof fn === 'function') {
+                return fn.apply(this, slice.call(arguments, 1))
+            }
+        },
+        //非严格模式下使用
+        $$super: function () {
+            var method = this.$$super.caller,
+                superMethod = method.__owner__.__super.prototype[method.__name__]
+
+            if (typeof superMethod === 'function') {
+                superMethod.apply(this, slice.call(arguments))
+            }
+        }
+
+        /*  $$super: function () {
+         var callFn = function (fn, scope, args) {
+
+         return fn.apply(scope, args)
+         }
+
+         var method = this.$$super.caller,
+         name = method.__name__,
+         superCls = method.__owner__ ? method.__owner__.__super : this.$self.__super
+
+
+         }*/
+
+    })
 
     X.Class = Class
 

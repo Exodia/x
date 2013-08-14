@@ -14,10 +14,11 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            {pattern: 'node_modules/expect.js/expect.js', include: true},
+            'node_modules/expect.js/expect.js',
             'src/X.core.js',
             'src/X.class.js',
-            'test/**/*.js'
+            'test/**/*.js',
+            {pattern: 'test/*.html', watched: false, included: false},
         ],
 
 
@@ -29,7 +30,7 @@ module.exports = function (config) {
 
         // test results reporter to use
         // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-        reporters: ['growl'],
+        reporters: ['progress'],
 
         growlReporter: {
             outputFile: './test-result.html'

@@ -27,37 +27,6 @@ describe('X.class Base Test', function () {
     })
 
 
-    /* var Sub1 = X.Class.create(Super, {
-     constructor: function () {
-     this.$super(arguments)
-     this.sub1Prop1 = 'sub1-1'
-     this.sub2Prop2 = 'sub1-2'
-     },
-     sub1Method1: function () {
-     this.$super(arguments)
-     console.log('sub1 method1')
-     },
-     sub1Method2: function () {
-     console.log('sub2 method2')
-     }
-     })
-
-     var Sub2 = X.Class.create(Sub1, {
-     constructor: function () {
-     this.$super(arguments)
-     this.sub2Prop1 = 'sub2-1'
-     this.sub2Prop2 = 'sub2-2'
-     },
-     sub2Method1: function () {
-     this.$super(arguments)
-     console.log('sub method1')
-     },
-     sub2Method2: function () {
-     console.log('sub method2')
-     }
-     })
-     */
-
     it("class's __initialize is set", function () {
         var ins = new Super()
         expect(Super.prototype.__initialize).to.be(init)
@@ -73,7 +42,7 @@ describe('X.class Base Test', function () {
         expect(ins.superProp2).to.equal(fn)
     })
 
-    it("instance's self is set to the class", function () {
+    it("instance's $self is set to the class", function () {
         var ins = new Super
 
         expect(ins.$self).to.equal(Super)
