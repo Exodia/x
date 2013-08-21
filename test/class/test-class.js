@@ -16,7 +16,7 @@ describe('X.class Base Test', function () {
     }
 
     var Super = X.Class.create({
-        __initialize: init,
+        constructor: init,
         __statics: statics,
         superMethod1: function () {
             console.log('super method1')
@@ -27,13 +27,13 @@ describe('X.class Base Test', function () {
     })
 
 
-    it("class's __initialize is set", function () {
+    it("class's constructor is set", function () {
         var ins = new Super()
-        expect(Super.prototype.__initialize).to.be(init)
-        expect(ins.__initialize).to.be(init)
+        expect(Super.prototype.constructor).to.be(init)
+        expect(ins.constructor).to.be(init)
     })
 
-    it("class's __initialize is called", function () {
+    it("class's constructor is called", function () {
         var fn = function () {
         }
         var ins = new Super(1, fn)

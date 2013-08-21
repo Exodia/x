@@ -7,7 +7,7 @@
  *      @example
  *      //create a simple Super class
  *      var Super = X.Class.create({
- *          __initialize: function(prop1, prop2){
+ *          constructor: function(prop1, prop2){
  *            this.prop1 = prop1
  *            this.prop2 = prop2
  *          },
@@ -18,10 +18,10 @@
  *
  *      //create a Sub class which inherits the Super class
  *      var Sub = X.Class.create(Super, {
- *          __initialize: function(prop1, prop2, prop3){
- *             //call the Super Class's "__initialize" method,
+ *          constructor: function(prop1, prop2, prop3){
+ *             //call the Super Class's "constructor" method,
  *             //and pass the prop1, prop2 as the arguments
- *             this.$super('__initialize', prop1, prop2)
+ *             this.$super('constructor', prop1, prop2)
  *             this.prop3 = prop3
  *          }
  *      })
@@ -30,8 +30,8 @@
  *      //you can call the parent's method of the same name so simply!
  *
  *      var Sub2 = X.Class.create(Sub, {
- *          __initialize: function(prop1, prop2, prop3){
- *             //call the Sub Class's "__initialize" method,
+ *          constructor: function(prop1, prop2, prop3){
+ *             //call the Sub Class's "constructor" method,
  *             //and pass the prop1, prop2, prop3 as the arguments
  *             this.$$super(prop1, prop2, prop3)
  *          },
@@ -74,7 +74,7 @@ define('X.class', ['X.core'], function (X) {
          * and shared by the Class instances!
          * However, there are some special important config properties as follows:
          *
-         * @param {Function} overrides.__initialize A initialize method.
+         * @param {Function} overrides.constructor A initialize method.
          * When creating a instance from a Class,
          * this method will always be called just acts as the constructor
          *
@@ -131,7 +131,7 @@ define('X.class', ['X.core'], function (X) {
          */
         _extend: function (superCls) {
             var kclass = function () {
-                this.__initialize.apply(this, arguments)
+                this.constructor.apply(this, arguments)
             }
 
             if (typeof superCls !== 'function') {
@@ -148,7 +148,6 @@ define('X.class', ['X.core'], function (X) {
 
             apply(kclass.prototype, {
                 $self: kclass,
-                constructor: kclass,
                 __statics: {}
             })
 
@@ -197,37 +196,36 @@ define('X.class', ['X.core'], function (X) {
 
         __super: null,
 
-        __initialize: function () {
+        __statics: {},
+
+        constructor: function () {
         },
 
         $super: function (method) {
-            var fn = this.__super.prototype[method]
+            var fn = this.$self.__super.prototype[method]
             if (typeof fn === 'function') {
                 return fn.apply(this, slice.call(arguments, 1))
             }
         },
+
         //非严格模式下使用
         $$super: function () {
+            var callFn = function (fn, scope, args) {
+                return fn.apply(scope, args)
+            }
+
             var method = this.$$super.caller,
-                superMethod = method.__owner__.__super.prototype[method.__name__]
+                name = method.__name__,
+                superCls = method.__owner__ ? method.__owner__.__super : this.$self.__super,
+                superMethod = superCls.prototype[name]
+
 
             if (typeof superMethod === 'function') {
-                superMethod.apply(this, slice.call(arguments))
+                callFn.__owner__ = this.$self
+                callFn.__name__ = name
+                return callFn(superMethod, this, arguments)
             }
         }
-
-        /*  $$super: function () {
-         var callFn = function (fn, scope, args) {
-
-         return fn.apply(scope, args)
-         }
-
-         var method = this.$$super.caller,
-         name = method.__name__,
-         superCls = method.__owner__ ? method.__owner__.__super : this.$self.__super
-
-
-         }*/
 
     })
 
