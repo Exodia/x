@@ -2,6 +2,8 @@
 *.swo
 *.DS_Store
 *.pid
+*.log
+.idea/
 coverage.html
 tmp/
 node_modules/
