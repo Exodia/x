@@ -135,49 +135,159 @@ describe('X.class Inherit Test', function () {
     })
 
 
-    describe("One level inheritance test", function () {
-        var sup = new Super(1, 2)
-        var sub1 = new Sub1(1, 2, 3, 4)
-        var sub2 = new Sub2(1, 2, 3, 4, 5, 6)
+    var sup = new Super(1, 2)
+    var sub1 = new Sub1(1, 2, 3, 4)
+    var sub2 = new Sub2(1, 2, 3, 4, 5, 6)
 
-        it("sub1's $$super are called", function () {
+
+    describe("One level inheritance test", function () {
+
+
+        it("Sub1's $self is set", function () {
+            expect(Sub1.prototype.$self).to.equal(Sub1)
+        })
+
+
+        it("Sub1's __super is equal to Super", function () {
+            expect(Sub1.__super).to.equal(Super)
+        })
+
+
+        it("sub1's $$super is called", function () {
             expect(sub1.superProp1).to.equal(1)
             expect(sub1.superProp2).to.equal(2)
         })
 
-        it("sub1's Super methods are set", function () {
+        it("sub1's inherited methods from Super are set", function () {
             expect(sub1.each).to.equal(sub1.$self.__super.prototype.each)
             expect(sub1.each).to.equal(sup.each)
+            expect(sub1.plus).to.equal(sub1.$self.__super.prototype.plus)
+            expect(sub1.plus).to.equal(sup.plus)
         })
 
-      /*  it("sub1's static properties are set", function () {
-            for (var k in statics) {
-                expect(Sub1[k]).to.equal(statics[k])
+        it("sub1's static properties are set", function () {
+            for (var k in sub1Statics) {
+                expect(Sub1[k]).to.equal(sub1Statics[k])
+            }
+        })
+
+        it("sub1's inherited static properties are set", function () {
+            for (var k in superStatics) {
+                expect(Sub1[k]).to.equal(superStatics[k])
             }
         })
 
         it("sub1's own properties are set", function () {
-            expect(sub1.sub1Prop1).to.equal('sub1-1')
-            expect(sub1.sub1Prop2).to.equal('sub1-2')
+            expect(sub1.sub1Prop1).to.equal(3)
+            expect(sub1.sub1Prop2).to.equal(4)
         })
 
         it("sub1's own methods are set", function () {
-            expect(sub1.sub1Method1).to.equal(Sub1.prototype.sub1Method1)
-            expect(sub1.sub1Method2).to.equal(Sub1.prototype.sub1Method2)
+            expect(sub1.fn1).to.equal(Sub1.prototype.fn1)
+            expect(sub1.fn2).to.equal(Sub1.prototype.fn2)
+            expect(sub1.minus).to.equal(Sub1.prototype.minus)
         })
 
-        it("sub1's $self is set", function () {
-            expect(sub1.$self).to.equal(Sub1)
+
+        it("Super constructor method is called", function () {
+            expect(sub1.superProp1).to.equal(1)
+            expect(sub1.superProp2).to.equal(2)
+        })
+    })
+
+    describe("Multiple level inheritance test", function () {
+
+        it("Sub2's $self is set", function () {
+            expect(Sub2.prototype.$self).to.equal(Sub2)
+        })
+
+
+        it("Sub2's __super is equal to Super", function () {
+            expect(Sub2.__super).to.equal(Sub1)
+        })
+
+        it("sub2's $$super is called", function () {
+            expect(sub2.superProp1).to.equal(1)
+            expect(sub2.superProp2).to.equal(2)
+            expect(sub2.sub1Prop1).to.equal(3)
+            expect(sub2.sub1Prop2).to.equal(4)
+        })
+
+        it("sub2's inherited methods from Super are set", function () {
+            expect(sub2.each).to.equal(sub2.$self.__super.__super.prototype.each)
+            expect(sub2.each).to.equal(sup.each)
+        })
+
+        it("sub2's inherited methods from Sub1 are set", function () {
+            expect(sub2.minus).to.equal(sub2.$self.__super.prototype.minus)
+            expect(sub2.minus).to.equal(sub1.minus)
+        })
+
+        it("sub2's static properties are set", function () {
+            for (var k in sub2Statics) {
+                expect(Sub2[k]).to.equal(sub2Statics[k])
+            }
+        })
+
+        it("sub2's inherited static properties are set", function () {
+            for (var k in superStatics) {
+                expect(Sub2[k]).to.equal(superStatics[k])
+            }
+            for (var k in sub1Statics) {
+                expect(Sub2[k]).to.equal(sub1Statics[k])
+            }
+        })
+
+
+        it("sub2's own properties are set", function () {
+            expect(sub2.sub2Prop1).to.equal(5)
+            expect(sub2.sub2Prop2).to.equal(6)
+        })
+
+        it("sub2's own methods are set", function () {
+            expect(sub2.fn1).to.equal(Sub2.prototype.fn1)
+            expect(sub2.fn2).to.equal(Sub2.prototype.fn2)
+            expect(sub2.multi).to.equal(Sub2.prototype.multi)
+        })
+
+        it("sub2's $self is set", function () {
+            expect(sub2.$self).to.equal(Sub2)
 
         })
 
         it("Super constructor method is called", function () {
-            var ins = new (X.Class.create(Super))(1, 2)
+            expect(sub2.superProp1).to.equal(1)
+            expect(sub2.superProp2).to.equal(2)
+        })
 
-            expect(ins.superProp1).to.equal(1)
-            expect(ins.superProp2).to.equal(2)
-        })*/
+        it("Sub1 constructor method is called", function () {
+            expect(sub2.sub1Prop1).to.equal(3)
+            expect(sub2.sub1Prop2).to.equal(4)
+        })
     })
 
+
+    describe("Inherited $$super call test", function () {
+        it("Super's instance methods are called right", function () {
+            expect(sup.fn1()).to.equal(sup.superProp1)
+            expect(sup.fn2()).to.equal(sup.superProp2)
+            expect(sup.plus(sup.fn1(), sup.fn2())).to.equal(sup.superProp1 + sup.superProp2)
+        })
+
+        it("Sub1's instance methods are called right", function () {
+            expect(sub1.fn1()).to.equal(sub1.superProp1 + sub1.sub1Prop1)
+            expect(sub1.fn2()).to.equal(sub1.superProp2 + sub1.sub1Prop2)
+            expect(sub1.plus(sup.fn1(), sup.fn2())).to.equal(sup.fn1() + sup.fn2())
+            expect(sub1.minus(sup.fn1(), sup.fn2())).to.equal(-sup.fn1() - sup.fn2())
+        })
+
+        it("Sub2's instance methods are called right", function () {
+            expect(sub2.fn1()).to.equal(sub1.fn1() + sub2.sub2Prop1)
+            expect(sub2.fn2()).to.equal(sub1.fn2() + sub2.sub2Prop2)
+            expect(sub2.plus(sub1.fn1(), sub1.fn2())).to.equal(sub1.fn1() + sub1.fn2())
+            expect(sub2.minus(sub1.fn1(), sub1.fn2())).to.equal(-sub1.fn1() - sub1.fn2())
+            expect(sub2.multi(sub1.fn1(), sub1.fn2())).to.equal(sub1.fn1() * sub1.fn2())
+        })
+    })
 
 })

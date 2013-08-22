@@ -75,8 +75,7 @@ define('X.class', ['X.core'], function (X) {
          * However, there are some special important config properties as follows:
          *
          * @param {Function} overrides.constructor A initialize method.
-         * When creating a instance from a Class,
-         * this method will always be called just acts as the constructor
+         * When creating a instance from a Class, this method will always be called
          *
          * @param {Object} overrides.__statics
          * Every key and value in overrides.__statics will be added to the Class Object,
@@ -110,7 +109,7 @@ define('X.class', ['X.core'], function (X) {
                     overrides[k].__name__ = k
                     overrides[k].__owner__ = kclass
                 }
-                k !== 'statics' && (proto[k] = overrides[k])
+                k !== '__statics' && (proto[k] = overrides[k])
             }
 
 
@@ -226,7 +225,6 @@ define('X.class', ['X.core'], function (X) {
                 return callFn(superMethod, this, arguments)
             }
         }
-
     })
 
     X.Class = Class

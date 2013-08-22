@@ -47,12 +47,4 @@ describe('X.class Base Test', function () {
 
         expect(ins.$self).to.equal(Super)
     })
-
-    it("__statics is set", function () {
-        expect(Super.prototype.__statics).to.be(statics)
-        for (var k in statics) {
-            expect(Super[k]).to.equal(statics[k])
-        }
-    })
-
 })
