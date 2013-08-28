@@ -4,7 +4,7 @@ var expect = require('expect.js')
 var X = require(src + '/X.core')*/
 
 
-describe('X is initialize', function () {
+describe('Initialize Test', function () {
     it('X is a function', function () {
         expect(X).to.be.an('function')
     })
@@ -25,4 +25,16 @@ describe('X.bind Test', function () {
 //    var hasOwnProperty = X.bind(Function.call, Object.prototype.hasOwnProperty)
 //    alert(hasOwnProperty)
 //    alert(hasOwnProperty({a:1}, 'a'))
+})
+
+describe('X.extend Test', function () {
+    
+})
+
+describe('X.has Test', function () {
+    
+})
+
+describe('X.define Test', function () {
+
 })

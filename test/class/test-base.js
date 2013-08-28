@@ -34,17 +34,17 @@ describe('X.class Base Test', function () {
     })
 
     it("class's constructor is called", function () {
-     var fn = function () {
-     }
-     var ins = new Super(1, fn)
+        var fn = function () {
+        }
+        var ins = new Super(1, fn)
 
-     expect(ins.superProp1).to.equal(1)
-     expect(ins.superProp2).to.equal(fn)
-     })
+        expect(ins.superProp1).to.equal(1)
+        expect(ins.superProp2).to.equal(fn)
+    })
 
-     it("instance's $self is set to the class", function () {
-     var ins = new Super
+    it("instance's $self is set to the class", function () {
+        var ins = new Super
 
-     expect(ins.$self).to.equal(Super)
-     })
+        expect(ins.$self).to.equal(Super)
+    })
 })

@@ -23,14 +23,44 @@ module.exports = function (grunt) {
                 src: 'build/<%= pkg.name %>.js',
                 dest: 'build/<%= pkg.name %>.min.js'
             }
+        },
+        karma: {
+            options: {
+                frameworks: ['mocha'],
+                files: [
+                    'node_modules/expect.js/expect.js',
+                    'build/x.js',
+                    'test/**/*.js'
+                ],
+
+                preprocessors: {
+                    'build/x.js': ['coverage']
+                },
+
+                coverageReporter: {
+                    type: 'html',
+                    dir: 'coverage/'
+                },
+                singleRun: true,
+                port: 9999,
+                reporters: ['spec', 'coverage'],
+                browsers: ['PhantomJS']
+            },
+            continuous: {
+                browsers: ['Chrome', 'FireFox', 'Safari', 'Opera', 'iOS']
+            },
+            dev: {
+                reporters: 'spec'
+            }
         }
     });
 
     // Load the plugin that provides the "uglify" task.
     grunt.loadNpmTasks('grunt-contrib-concat')
     grunt.loadNpmTasks('grunt-contrib-uglify')
+    grunt.loadNpmTasks('grunt-karma')
 
     // Default task(s).
-    grunt.registerTask('default', ['concat','uglify'])
+    grunt.registerTask('default', ['concat', 'uglify', 'karma:continuous'])
 
 }
