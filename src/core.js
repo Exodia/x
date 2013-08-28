@@ -49,6 +49,19 @@
         }
     }
 
+    /**
+     * @method has
+     * Detect the object whether contains the given key.
+     * Identical to object.hasOwnProperty(key), but uses a safe reference to the hasOwnProperty function,
+     * in case it's been overridden accidentally.
+     *
+     * @member X
+     *
+     * @param {Object} obj  The object to be detected
+     * @param {String} key  The key name to be detected
+     * @return {Boolean} The detected result
+     *
+     */
     X.has = X.bind(X.call, Object.prototype.hasOwnProperty)
 
 
