@@ -85,21 +85,24 @@ describe('X.class Inherit Test', function () {
             })
 
             return sum
+        },
+        toString: function () {
+            return this.plus(this.fn1(), this.fn2())
         }
     })
 
     var Sub1 = X.Class.create(Super, {
         constructor: function (prop1, prop2, prop3, prop4) {
-            this.$$super(prop1, prop2)
+            this.$super(prop1, prop2)
             this.sub1Prop1 = prop3
             this.sub1Prop2 = prop4
         },
         __statics: sub1Statics,
         fn1: function () {
-            return this.plus(this.$$super() + this.sub1Prop1)
+            return this.plus(this.$super() + this.sub1Prop1)
         },
         fn2: function () {
-            return this.plus(this.$$super() + this.sub1Prop2)
+            return this.plus(this.$super() + this.sub1Prop2)
         },
         minus: function () {
             var sum = 0
@@ -108,21 +111,24 @@ describe('X.class Inherit Test', function () {
             })
 
             return sum
+        },
+        toString: function () {
+            return this.plus(this.$super('toString'), this.sub1Prop1, this.sub1Prop2)
         }
     })
 
     var Sub2 = X.Class.create(Sub1, {
         constructor: function (prop1, prop2, prop3, prop4, prop5, prop6) {
-            this.$$super(prop1, prop2, prop3, prop4)
+            this.$super(prop1, prop2, prop3, prop4)
             this.sub2Prop1 = prop5
             this.sub2Prop2 = prop6
         },
         __statics: sub2Statics,
         fn1: function () {
-            return this.plus(this.$$super() + this.sub2Prop1)
+            return this.plus(this.$super() + this.sub2Prop1)
         },
         fn2: function () {
-            return this.plus(this.$$super() + this.sub2Prop2)
+            return this.plus(this.$super() + this.sub2Prop2)
         },
         multi: function () {
             var sum = 1
@@ -131,6 +137,9 @@ describe('X.class Inherit Test', function () {
             })
 
             return sum
+        },
+        toString: function () {
+            return this.plus(this.fn1(), this.fn2())
         }
     })
 
@@ -153,7 +162,7 @@ describe('X.class Inherit Test', function () {
         })
 
 
-        it("sub1's $$super is called", function () {
+        it("sub1's $super is called", function () {
             expect(sub1.superProp1).to.equal(1)
             expect(sub1.superProp2).to.equal(2)
         })
@@ -206,7 +215,7 @@ describe('X.class Inherit Test', function () {
             expect(Sub2.__super).to.equal(Sub1)
         })
 
-        it("sub2's $$super is called", function () {
+        it("sub2's $super is called", function () {
             expect(sub2.superProp1).to.equal(1)
             expect(sub2.superProp2).to.equal(2)
             expect(sub2.sub1Prop1).to.equal(3)
@@ -267,7 +276,7 @@ describe('X.class Inherit Test', function () {
     })
 
 
-    describe("Inherited $$super call test", function () {
+    describe("Inherited $super call test", function () {
         it("Super's instance methods are called right", function () {
             expect(sup.fn1()).to.equal(sup.superProp1)
             expect(sup.fn2()).to.equal(sup.superProp2)

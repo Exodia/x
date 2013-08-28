@@ -1,39 +1,42 @@
 {
-    "name": "x",
-    "version": "0.0.0",
-    "description": "A simple library for study",
-    "main": "null",
-    "directories": {
-        "doc": "docs",
-        "example": "examples",
-        "test": "test"
-    },
-    "scripts": {
-        "test": "make test",
-        "build": "make build",
-        "min": "make min"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Exodia/x.git"
-    },
-    "keywords": [
-        "x"
-    ],
-    "devDependencies": {
-        "jsmin": "latest",
-        "jslint": "latest",
-        "uglify-js": "latest",
-        "mocha": "latest",
-        "expectjs": "latest",
-        "karma": "latest",
-        "karma-mocha": "latest",
-        "benchmark": "latest"
-    },
-    "author": "Exodia",
-    "email": "d_xinxin@163.com",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/Exodia/x/issues"
-    }
+  "name": "x",
+  "version": "0.0.0",
+  "description": "A simple library for study",
+  "main": "null",
+  "directories": {
+    "doc": "docs",
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "grunt test",
+    "build": "grunt concat",
+    "min": "grunt uglify"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Exodia/x.git"
+  },
+  "keywords": [
+    "x"
+  ],
+  "devDependencies": {
+    "jsmin": "latest",
+    "jslint": "latest",
+    "uglify-js": "latest",
+    "mocha": "latest",
+    "expectjs": "latest",
+    "karma": "latest",
+    "karma-mocha": "latest",
+    "benchmark": "latest",
+    "grunt": "~0.4.1",
+    "grunt-contrib-uglify": "~0.2.2",
+    "grunt-contrib-concat": "~0.3.0"
+  },
+  "author": "Exodia",
+  "email": "d_xinxin@163.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Exodia/x/issues"
+  }
 }

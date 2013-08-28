@@ -16,8 +16,13 @@ describe('X is initialize', function () {
         expect(X.define).to.be.an('function')
     })
 
-
     it('global define is equal X.define', function () {
         expect(define).to.equal(X.define)
     })
+})
+
+describe('X.bind Test', function () {
+//    var hasOwnProperty = X.bind(Function.call, Object.prototype.hasOwnProperty)
+//    alert(hasOwnProperty)
+//    alert(hasOwnProperty({a:1}, 'a'))
 })

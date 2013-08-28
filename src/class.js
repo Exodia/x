@@ -1,6 +1,5 @@
-;
 /**
- * @class Class
+ * @class X.Class
  * A simple implement of OO Class System
  *
  * See the example:
@@ -10,9 +9,10 @@
  *          constructor: function(prop1, prop2){
  *            this.prop1 = prop1
  *            this.prop2 = prop2
+ *            alert("Super init")
  *          },
- *          method1: function () {
- *               alert('Super method1')
+ *          method: function () {
+ *               alert('Super method')
  *          }
  *      })
  *
@@ -21,39 +21,39 @@
  *          constructor: function(prop1, prop2, prop3){
  *             //call the Super Class's "constructor" method,
  *             //and pass the prop1, prop2 as the arguments
- *             this.$super('constructor', prop1, prop2)
+ *             this.$super(prop1, prop2)
  *             this.prop3 = prop3
+ *             alert("Sub init")
  *          }
  *      })
  *
- *      //if your code is not in strict mode, using this.$$super() method,
- *      //you can call the parent's method of the same name so simply!
- *
- *      var Sub2 = X.Class.create(Sub, {
+ *      var Sub1 = X.Class.create(Sub, {
  *          constructor: function(prop1, prop2, prop3){
  *             //call the Sub Class's "constructor" method,
  *             //and pass the prop1, prop2, prop3 as the arguments
- *             this.$$super(prop1, prop2, prop3)
+ *             this.$super(prop1, prop2, prop3)
+ *             alert("Sub1 init")
  *          },
- *          method1: function(){
+ *          method: function(){
  *              //call the Sub's "method1" method
- *              this.$$super()
- *              alert('Sub2 method1')
+ *              this.$super()
+ *              alert('Sub1 method')
  *          }
  *      })
+ *
+ *      var sub1 = new Sub1 //alert: Super init, Sub init, Sub1 init
+ *      sub1.method() //alert: Super method, Sub1 method
  */
-define('X.class', ['X.core'], function (X) {
+define('X.Class', ['x'], function (X) {
     var slice = [].slice,
-        apply = function (obj, props) {
-            for (var k in props) {
-                obj[k] = props[k]
-            }
-        }
+        apply = X.extend
 
     /**
+     * @constructor
      * Create an anonymous class
      * usage: new X.Class(config)  or  X.Class.create(config)
-     * @constructor
+     *
+     * @member X.Class
      * @return {X.Class}
      */
     var Class = function () {
@@ -63,10 +63,11 @@ define('X.class', ['X.core'], function (X) {
     apply(Class, {
         /**
          * Return a X.Class instance function, equal new Class(Super, overrides)
-         * @method X.Class
+         * @method create
+         * @member X.Class
          * @static
          *
-         * @param {X.Class/Function} Super
+         * @param {X.Class/Function} Super (optional)
          * Optional, the parent class that this class extends, can be ignored.
          *
          * @param {Object} overrides
@@ -74,7 +75,7 @@ define('X.class', ['X.core'], function (X) {
          * and shared by the Class instances!
          * However, there are some special important config properties as follows:
          *
-         * @param {Function} overrides.constructor A initialize method.
+         * @param {Function} overrides.constructor An initialize method.
          * When creating a instance from a Class, this method will always be called
          *
          * @param {Object} overrides.__statics
@@ -94,39 +95,42 @@ define('X.class', ['X.core'], function (X) {
             } else if (typeof Super === 'object') {
                 overrides = Super
             } else {
-                throw new Error("Class create error: The first arguments should be an function or Object")
+                overrides = {}
             }
 
             var proto = kclass.prototype,
                 protoStatics = proto.__statics,
-                overStatics = overrides.__statics,
-                k
-
+                overStatics = overrides.__statics
 
             //覆盖其余属性
-            for (k in overrides) {
-                if (typeof overrides[k] === 'function') {
-                    overrides[k].__name__ = k
-                    overrides[k].__owner__ = kclass
+            X.forEach(overrides, function (v, k) {
+                if (typeof v === 'function') {
+                    v.__name__ = k
+                    v.__owner__ = kclass
                 }
-                k !== '__statics' && (proto[k] = overrides[k])
-            }
-
+                k !== '__statics' && (proto[k] = v)
+            })
 
             //覆盖静态属性
-            for (k in overStatics) {
-                kclass[k] = protoStatics[k] = overStatics[k]
-            }
+            overStatics && X.forEach(overStatics, function (v, k) {
+                kclass[k] = protoStatics[k] = v
+            })
 
             return kclass
         },
 
         /**
+         * @method _extend
          * used for X.Class.create method
+         *
+         * @member X.Class
          * @private
-         * @param superCls
+         * @static
+         *
+         * @param {X.Class} superCls
+         * the super class to inherit
+         *
          * @returns {X.Class}
-         * @private
          */
         _extend: function (superCls) {
             var kclass = function () {
@@ -157,7 +161,17 @@ define('X.class', ['X.core'], function (X) {
             }
 
             return kclass
-        }
+        },
+
+        /**
+         * @property {X.Class} __super
+         * the reference of the Super Class
+         *
+         * @private
+         * @static
+         * @member X.Class
+         */
+        __super: null
     })
 
     apply(Class.prototype, {
@@ -193,37 +207,76 @@ define('X.class', ['X.core'], function (X) {
          */
         $self: Class,
 
-        __super: null,
-
+        /**
+         * @property {Object} __statics
+         * the key map of the Class's Statics properties
+         *
+         * @private
+         * @member X.Class
+         */
         __statics: {},
 
         constructor: function () {
         },
 
-        $super: function (method) {
-            var fn = this.$self.__super.prototype[method]
-            if (typeof fn === 'function') {
-                return fn.apply(this, slice.call(arguments, 1))
-            }
-        },
 
-        //非严格模式下使用
-        $$super: function () {
-            var callFn = function (fn, scope, args) {
-                return fn.apply(scope, args)
-            }
+        /*
+         * 想实现 $super('methodName', arguments)的功能，无奈，只能实现一层继承的调用，
+         * 多层无法实现，先不搞了。。么么哒！！
+         * */
+        /*$super: function (name) {
 
-            var method = this.$$super.caller,
+         if (typeof name !== 'string' || !(name instanceof String)) {
+         throw "$super's first argument must be a string"
+         }
+
+         var superCls = this.$self.__super,
+         fn = superCls.prototype[name]
+
+         if (typeof fn !== 'function') {
+         throw "Call the super class's " + name + ", but it is not a function!"
+         }
+
+         if (fn.__called__) {
+         delete fn.__called__
+
+         fn = fn.__owner__.__super.prototype[name]
+
+         if (typeof fn !== 'function') {
+         throw "Call the super class's " + name + ", but it is not a function!"
+         }
+         }
+
+
+         return fn.apply(this, slice.call(arguments, 1))
+         },*/
+
+        /* 非严格模式下使用，
+         * 不支持函数嵌套调用：
+         * function(){ function(){ this.$super() } }
+         */
+
+        /**
+         * @method $super
+         * call the super class's method,
+         * note: can not used in strict mode
+         *
+         * @member X.Class
+         *
+         * @returns {*}
+         */
+        $super: function () {
+            var method = this.$super.caller,
                 name = method.__name__,
-                superCls = method.__owner__ ? method.__owner__.__super : this.$self.__super,
+                superCls = method.__owner__.__super,
                 superMethod = superCls.prototype[name]
 
 
-            if (typeof superMethod === 'function') {
-                callFn.__owner__ = this.$self
-                callFn.__name__ = name
-                return callFn(superMethod, this, arguments)
+            if (typeof superMethod !== 'function') {
+                throw "Call the super class's " + name + ", but it is not a function!"
             }
+
+            return superMethod.apply(this, arguments)
         }
     })
 

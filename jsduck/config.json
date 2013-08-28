@@ -1,0 +1,12 @@
+{
+    "--title": "X — A Library for study",
+    "--output": "../docs/",
+//    "--guides": "guide.json",
+    "--categories": "categories.json",
+    "--examples": "example.json",
+    "--examples-base-url": "../demo/",
+    "--eg-iframe": "eg-iframe.html",
+    "--": [
+        "../build/x.js"
+    ]
+}

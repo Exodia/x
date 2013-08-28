@@ -1,0 +1,16 @@
+[
+    {
+        "name": "Core",
+        "groups": [
+            {
+                "name": "Class System",
+                "classes": [
+                    "X",
+                    "X.Class"
+                ]
+            }
+        ]
+
+
+    }
+]
