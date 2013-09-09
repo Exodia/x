@@ -1,4 +1,4 @@
-//todo X.bind deal with new operator
+//TODO: X.bind deal with new operator
 
 (function (global, alias) {
     if (typeof global[alias] === 'function') {
@@ -88,6 +88,10 @@
         }
     }
 
+    /**
+     * @method define
+     * @member X
+     */
     X.define = typeof define === 'function' && define.amd && define ||
         function (module, deps, factory) {
             if (deps && deps.length) {
@@ -107,7 +111,7 @@
         global.define = X.define
     }
 
-    X.define('x', [], function () {
+    X.define('X.Core', [], function () {
         return X
     })
 

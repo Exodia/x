@@ -1,5 +1,5 @@
-/*! x - v0.0.0 - 2013-08-28 */
-//todo X.bind deal with new operator
+/*! x - v0.0.0 - 2013-09-09 */
+//TODO: X.bind deal with new operator
 
 (function (global, alias) {
     if (typeof global[alias] === 'function') {
@@ -89,6 +89,10 @@
         }
     }
 
+    /**
+     * @method define
+     * @member X
+     */
     X.define = typeof define === 'function' && define.amd && define ||
         function (module, deps, factory) {
             if (deps && deps.length) {
@@ -108,12 +112,15 @@
         global.define = X.define
     }
 
-    X.define('x', [], function () {
+    X.define('X.Core', [], function () {
         return X
     })
 
 }(typeof global !== 'undefined' ? global : this, 'X'));
-define('X.Enumerable', ['x'], function (X) {
+/**
+ *
+ */
+define('X.Enumerable', ['X.Core'], function (X) {
         var hasEnumBug = !({toString: 1}['propertyIsEnumerable']('toString')),
             enumProperties = [
                 'constructor',
@@ -136,9 +143,20 @@ define('X.Enumerable', ['x'], function (X) {
         var hasOwnProperty = X.bind(ObjProto.hasOwnProperty)
 
 
-        var nativeEach = ArrayProto.forEach
+        var nativeEach = ArrayProto.forEach,
+            nativeIndexOf = ArrayProto.indexOf,
+            nativeLastIndexOf = ArrayProto.lastIndexOf
 
         X.Enumerable = {
+
+            /**
+             * @method forEach 待添加
+             * @member X.Enumerable
+             * @param obj
+             * @param iterator
+             * @param context
+             * @returns {*}
+             */
             forEach: function (obj, iterator, context) {
                 if (obj === null) {
                     return
@@ -177,10 +195,90 @@ define('X.Enumerable', ['x'], function (X) {
                     }
                 }
 
+            },
+
+            each: function (obj, iterator, context) {
+                X.forEach(obj, function (v, i, obj) {
+                    return iterator.apply(context, i, v, obj)
+                })
+            },
+
+            /**
+             *
+             */
+            indexOf: function (obj, el, from) {
+                if (nativeIndexOf && obj.indexOf === nativeIndexOf) {
+                    return obj.indexOf(el, from)
+                }
+
+
+                obj = Object(obj)
+                from = Number(from)
+                from = isNaN(from) && 0
+
+                var index = -1, len = obj.length >>> 0,
+                    k = (from < 0 ? Math.max(0, len + from) : from)
+
+                for (; k < len; ++k) {
+                    if (obj[k] === el) {
+                        index = k
+                        break
+                    }
+                }
+
+                return index
+            },
+
+            lastIndexOf: function (obj, el, start) {
+                if (nativeLastIndexOf && obj.lastIndexOf === nativeLastIndexOf) {
+                    return obj.LastIndexOf(el, start)
+                }
+
+                var index = -1, i = +obj.length || 0
+
+                while (--i > -1) {
+                    if (el === obj[i]) {
+                        index = i
+                        break
+                    }
+                }
+
+                return index
+            },
+
+            every: function (obj, fn, context) {
+                X.forEach(obj, function (v, i, obj) {
+
+                })
+            },
+
+            filter: function () {
+
+            },
+
+            some: function () {
+
+            },
+
+
+            reduce: function () {
+
+            },
+
+            reduceRight: function () {
+
+            },
+
+            map: function () {
+
             }
         }
 
-
+        /**
+         * Alias for {@link X.Enumerable#forEach X.Enumerable.forEach}
+         * @member X
+         * @method forEach
+         */
         X.forEach = X.Enumerable.forEach
 
         return X.Enumerable
@@ -208,8 +306,8 @@ define('X.Enumerable', ['x'], function (X) {
  *      var Sub = X.Class.create(Super, {
  *          constructor: function(prop1, prop2, prop3){
  *             //call the Super Class's "constructor" method,
- *             //and pass the prop1, prop2 as the arguments
- *             this.$super(prop1, prop2)
+ *             //and pass the arguments
+ *             this.$super(arguments)
  *             this.prop3 = prop3
  *             alert("Sub init")
  *          }
@@ -218,13 +316,13 @@ define('X.Enumerable', ['x'], function (X) {
  *      var Sub1 = X.Class.create(Sub, {
  *          constructor: function(prop1, prop2, prop3){
  *             //call the Sub Class's "constructor" method,
- *             //and pass the prop1, prop2, prop3 as the arguments
- *             this.$super(prop1, prop2, prop3)
+ *             //and pass the arguments
+ *             this.$super(arguments)
  *             alert("Sub1 init")
  *          },
  *          method: function(){
  *              //call the Sub's "method1" method
- *              this.$super()
+ *              this.$super(arguments)
  *              alert('Sub1 method')
  *          }
  *      })
@@ -232,7 +330,7 @@ define('X.Enumerable', ['x'], function (X) {
  *      var sub1 = new Sub1 //alert: Super init, Sub init, Sub1 init
  *      sub1.method() //alert: Super method, Sub1 method
  */
-define('X.Class', ['x'], function (X) {
+define('X.Class', ['X.Core'], function (X) {
     var slice = [].slice,
         apply = X.extend
 
@@ -445,15 +543,18 @@ define('X.Class', ['x'], function (X) {
          */
 
         /**
-         * @method $super
          * call the super class's method,
          * note: can not used in strict mode
          *
+         * @method $super
          * @member X.Class
+         *
+         * @params {Object/Array} args
+         * The arguments object or array passed to the method
          *
          * @returns {*}
          */
-        $super: function () {
+        $super: function (args) {
             var method = this.$super.caller,
                 name = method.__name__,
                 superCls = method.__owner__.__super,
@@ -464,7 +565,7 @@ define('X.Class', ['x'], function (X) {
                 throw "Call the super class's " + name + ", but it is not a function!"
             }
 
-            return superMethod.apply(this, arguments)
+            return superMethod.apply(this, args)
         }
     })
 

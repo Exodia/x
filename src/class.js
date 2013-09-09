@@ -20,8 +20,8 @@
  *      var Sub = X.Class.create(Super, {
  *          constructor: function(prop1, prop2, prop3){
  *             //call the Super Class's "constructor" method,
- *             //and pass the prop1, prop2 as the arguments
- *             this.$super(prop1, prop2)
+ *             //and pass the arguments
+ *             this.$super(arguments)
  *             this.prop3 = prop3
  *             alert("Sub init")
  *          }
@@ -30,13 +30,13 @@
  *      var Sub1 = X.Class.create(Sub, {
  *          constructor: function(prop1, prop2, prop3){
  *             //call the Sub Class's "constructor" method,
- *             //and pass the prop1, prop2, prop3 as the arguments
- *             this.$super(prop1, prop2, prop3)
+ *             //and pass the arguments
+ *             this.$super(arguments)
  *             alert("Sub1 init")
  *          },
  *          method: function(){
  *              //call the Sub's "method1" method
- *              this.$super()
+ *              this.$super(arguments)
  *              alert('Sub1 method')
  *          }
  *      })
@@ -44,7 +44,7 @@
  *      var sub1 = new Sub1 //alert: Super init, Sub init, Sub1 init
  *      sub1.method() //alert: Super method, Sub1 method
  */
-define('X.Class', ['x'], function (X) {
+define('X.Class', ['X.Core'], function (X) {
     var slice = [].slice,
         apply = X.extend
 
@@ -257,15 +257,18 @@ define('X.Class', ['x'], function (X) {
          */
 
         /**
-         * @method $super
          * call the super class's method,
          * note: can not used in strict mode
          *
+         * @method $super
          * @member X.Class
+         *
+         * @params {Object/Array} args
+         * The arguments object or array passed to the method
          *
          * @returns {*}
          */
-        $super: function () {
+        $super: function (args) {
             var method = this.$super.caller,
                 name = method.__name__,
                 superCls = method.__owner__.__super,
@@ -276,7 +279,7 @@ define('X.Class', ['x'], function (X) {
                 throw "Call the super class's " + name + ", but it is not a function!"
             }
 
-            return superMethod.apply(this, arguments)
+            return superMethod.apply(this, args)
         }
     })
 

@@ -10,7 +10,7 @@ module.exports = function (grunt) {
                     '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
             },
             dist: {
-                src: ['src/core.js', 'src/enumerable.js', 'src/class.js'],
+                src: ['src/core.js', 'src/enumerable.js', 'src/class.js', 'src/promise.js'],
                 dest: 'build/<%= pkg.name %>.js'
             }
         },
@@ -47,10 +47,10 @@ module.exports = function (grunt) {
                 browsers: ['PhantomJS']
             },
             continuous: {
-                browsers: ['Chrome', 'FireFox', 'Safari', 'Opera', 'iOS']
+                browsers: ['Chrome', 'Firefox', 'Safari', 'Opera', 'iOS']
             },
             dev: {
-                reporters: 'spec'
+                reporters: ['spec', 'coverage']
             }
         }
     });
@@ -62,5 +62,7 @@ module.exports = function (grunt) {
 
     // Default task(s).
     grunt.registerTask('default', ['concat', 'uglify', 'karma:continuous'])
+    grunt.registerTask('dev', ['concat', 'uglify', 'karma:dev'])
+    grunt.registerTask('test', ['karma:dev'])
 
 }
