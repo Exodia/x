@@ -15,7 +15,7 @@ describe('X.class Base Test', function () {
         this.superProp2 = prop2
     }
 
-    var Super = X.Class.create({
+    var Super = X.Class({
         constructor: init,
         __statics: statics,
         superMethod1: function () {
@@ -46,5 +46,39 @@ describe('X.class Base Test', function () {
         var ins = new Super
 
         expect(ins.$self).to.equal(Super)
+    })
+
+    it("insanceof works right", function () {
+        var ins = new Super
+        expect(ins instanceof Super).to.be(true)
+
+        var C = X.Class({
+            constructor: function () {
+                if (!(this instanceof C)) {
+                    return new C
+                }
+            }
+        })
+
+        var c = C()
+
+        expect(c instanceof C).to.be(true)
+    })
+
+    it("instance equal the constructor returned object", function () {
+        var obj = {}
+        var C = X.Class({
+            constructor: function () {
+                return obj
+            }
+        })
+
+        var c = new C(),
+            d = C()
+
+        expect(c instanceof C).to.not.be(true)
+        expect(d instanceof C).to.not.be(true)
+        expect(c).equal(d)
+        expect(d).equal(obj)
     })
 })

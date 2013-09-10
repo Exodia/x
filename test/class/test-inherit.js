@@ -91,7 +91,7 @@ describe('X.class Inherit Test', function () {
         }
     })
 
-    var Sub1 = X.Class.create(Super, {
+    var Sub1 = X.Class(Super, {
         constructor: function (prop1, prop2, prop3, prop4) {
             this.$super(arguments)
             this.sub1Prop1 = prop3
@@ -114,7 +114,7 @@ describe('X.class Inherit Test', function () {
         }
     })
 
-    var Sub2 = X.Class.create(Sub1, {
+    var Sub2 = X.Class(Sub1, {
         constructor: function (prop1, prop2, prop3, prop4, prop5, prop6) {
             this.$super(arguments)
             this.sub2Prop1 = prop5

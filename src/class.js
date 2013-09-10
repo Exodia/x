@@ -57,7 +57,7 @@ define('X.Class', ['X.Core'], function (X) {
      * @return {X.Class}
      */
     var Class = function () {
-        return Class.create(slice.call(arguments))
+        return Class.create.apply(Class, slice.call(arguments))
     }
 
     apply(Class, {
@@ -134,7 +134,7 @@ define('X.Class', ['X.Core'], function (X) {
          */
         _extend: function (superCls) {
             var kclass = function () {
-                this.constructor.apply(this, arguments)
+                return kclass.prototype.constructor.apply(this, arguments)
             }
 
             if (typeof superCls !== 'function') {

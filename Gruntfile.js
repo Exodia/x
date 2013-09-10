@@ -33,6 +33,10 @@ module.exports = function (grunt) {
                     'test/**/*.js'
                 ],
 
+                exclude: [
+                    'test/promise/*.js'
+                ],
+
                 preprocessors: {
                     'build/x.js': ['coverage']
                 },
@@ -63,6 +67,6 @@ module.exports = function (grunt) {
     // Default task(s).
     grunt.registerTask('default', ['concat', 'uglify', 'karma:continuous'])
     grunt.registerTask('dev', ['concat', 'uglify', 'karma:dev'])
+    grunt.registerTask('build', ['concat', 'uglify'])
     grunt.registerTask('test', ['karma:dev'])
-
 }

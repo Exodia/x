@@ -1,21 +1,35 @@
 /**
- * @file An implement of Promise/A
+ * @file An implement of Promise/A+
+ * @see http://promises-aplus.github.io/promises-spec/
  * @author exodia(d_xinxin@163.com)
  * Date: 13-9-9
  * Time: 上午11:01
  */
 
-X.define('X.Promise', ['X.core', 'X.Class', 'X.Enumerable'], function (X, Class) {
+X.define('X.Promise', ['X.Core', 'X.Class', 'X.Enumerable'], function (X, Class) {
     var PENDING = 'pending',
         FULFILLED = 'fulfilled',
         REJECTED = 'rejected'
 
+
+    var connect = function (promise1, promise2) {
+        promise1.then(
+            function (val) {
+                promise2.resolve(val)
+            },
+
+            function (val) {
+                promise2.reject(val)
+            }
+        )
+    }
+
     /**
-     * @class
+     * @class X.Promise
      */
     X.Promise = Class({
         constructor: function () {
-            if (!this instanceof X.Promise) {
+            if (!(this instanceof X.Promise)) {
                 return new X.Promise()
             }
 
@@ -40,11 +54,9 @@ X.define('X.Promise', ['X.core', 'X.Class', 'X.Enumerable'], function (X, Class)
 
         _value: undefined,
 
-        _fulfilledHandlers: null,
+        _fulfilledArray: null,
 
-        _errorHandlers: null,
-
-        _progressHandlers: null,
+        _rejectedArray: null,
 
         _asyncExec: function () {
             var promise = this
@@ -55,23 +67,40 @@ X.define('X.Promise', ['X.core', 'X.Class', 'X.Enumerable'], function (X, Class)
 
             var phs = null
             if (promise._status === FULFILLED) {
+                //spec 3.2.2.3
                 promise._rejectedArray = []
                 phs = promise._fulfilledArray
             } else {
+                //spec 3.2.3.3
                 promise._fulfilledArray = []
                 phs = promise._rejectedArray
             }
-
 
             setTimeout(function () {
                 var ph,
                     val = promise._value
 
-                while (ph = phs.shift()) {
+                //spec 3.2.5
+                while (ph = phs.shift()) { //spec 3.2.2.2, 3.2.3.2
+                    if (typeof ph.handler !== 'function') { //spec spec 3.2.1
+                        //spec 3.2.6.4, 3.2.6.5
+                        ph.promise[promise._status === FULFILLED ? 'resolve' : 'reject'](val)
+                        continue
+                    }
+
                     try {
-                        ph.promise.resolve(ph.handler(val))
+                        //spec 3.2.2.1, 3.2.3.1
+                        var returnVal = ph.handler(val)
+                        // 这样判断是否为 promise 实例，我是不太赞同的，
+                        // 但是标准测试用例会伪造一个 promise，
+//                        returnVal instanceof X.Promise
+                        returnVal && typeof returnVal.then === 'function'
+                            ? connect(returnVal, ph.promise) //spec 3.2.6.3
+                            : ph.promise.resolve(returnVal) //spec 3.2.6.1
+
                     } catch (e) {
-                        promise.reject(e)
+                        //spec 3.2.6.2
+                        ph.promise.reject(e)
                     }
                 }
             }, 0)
@@ -93,27 +122,18 @@ X.define('X.Promise', ['X.core', 'X.Class', 'X.Enumerable'], function (X, Class)
         then: function (fulfilledHandler, rejectedHandler) {
             var promise = X.Promise()
 
-            if (typeof fulfilledHandler === 'function') {
-                this._fulfilledArray.push({
-                    promise: promise,
-                    handler: fulfilledHandler
-                })
-            } else {
-                this._status === FULFILLED && (promise.resolve(this._value))
-            }
+            this._fulfilledArray.push({
+                promise: promise,
+                handler: fulfilledHandler
+            })
+            this._rejectedArray.push({
+                promise: promise,
+                handler: rejectedHandler
+            })
 
-
-            if (typeof rejectedHandler === 'function') {
-                this._rejectedArray.push({
-                    promise: promise,
-                    handler: rejectedHandler
-                })
-            } else {
-                this._status === REJECTED && (promise.reject(this._value))
-            }
 
             this._asyncExec()
-
+            //spec 3.2.4, 3.2.6
             return promise
         },
 
@@ -143,21 +163,37 @@ X.define('X.Promise', ['X.core', 'X.Class', 'X.Enumerable'], function (X, Class)
         },
 
         resolve: function (val) {
+            //spec 3.1
+            if (this._status !== PENDING) {
+                throw Error(
+                    'promise is not in ' + PENDING
+                        + ' so can not resolve!'
+                )
+            }
+
+            //spec 3.2.2.1
             this._value = val
             this._status = FULFILLED
             this._asyncExec()
 
         },
+
         reject: function (reason) {
+            //spec 3.1
+            if (this._status !== PENDING) {
+                throw Error(
+                    'promise is not in ' + PENDING
+                        + ' so can not resolve!'
+                )
+            }
+
+            //spec 3.2.3.1
             this._value = reason
             this._status = REJECTED
             this._asyncExec()
-        },
-
-        notify: function () {
-
         }
+
     })
 
-
+    return X.Promise
 })
