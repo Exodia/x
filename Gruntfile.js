@@ -26,9 +26,8 @@ module.exports = function (grunt) {
         },
         karma: {
             options: {
-                frameworks: ['mocha'],
+                frameworks: ['mocha', 'expect'],
                 files: [
-                    'node_modules/expect.js/expect.js',
                     'build/x.js',
                     'test/**/*.js'
                 ],

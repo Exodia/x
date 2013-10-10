@@ -35,7 +35,8 @@
     "karma-firefox-launcher": "~0.1.0",
     "karma-opera-launcher": "~0.1.0",
     "karma-safari-launcher": "~0.1.1",
-    "promises-aplus-tests": "~1.3.2"
+    "promises-aplus-tests": "~1.3.2",
+    "karma-expect": "~1.0.0"
   },
   "author": "Exodia",
   "email": "d_xinxin@163.com",
