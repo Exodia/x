@@ -31,16 +31,35 @@ define('X.Enumerable', ['X.Core'], function (X) {
         X.Enumerable = {
 
             /**
-             * @method forEach 待添加
+             * executes the provided iterator once for each element
+             * of the array/object with an assigned value.
+             * It is not invoked for indexes which have been deleted or
+             * which have been initialized to undefined.
+             *
+             * @method forEach
              * @member X.Enumerable
-             * @param obj
-             * @param iterator
+             *
+             * @param {Array | Object} obj
+             * The object or array to be iterated
+             *
+             * @param {Function} iterator
+             * Function to execute for each element
+             * @param iterator.item
+             * The item at the current `index` in the passed `object` or `array`
+             * @param iterator.index
+             * The current `index` or `key` within the `array` or `object`
+             * @param iterator.obj
+             * The `array` or `object` itself which was passed as the first argument
+             *
              * @param context
+             * Object to use as **this** when executing **iterator**
+             *
              * @returns {*}
              */
             forEach: function (obj, iterator, context) {
+
                 if (obj === null) {
-                    return
+                    throw new TypeError("obj is null or not defined")
                 }
 
                 if (nativeEach && obj.forEach === nativeEach) {
