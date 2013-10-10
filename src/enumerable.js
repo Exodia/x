@@ -97,12 +97,6 @@ define('X.Enumerable', ['X.Core'], function (X) {
 
             },
 
-            each: function (obj, iterator, context) {
-                X.forEach(obj, function (v, i, obj) {
-                    return iterator.apply(context, i, v, obj)
-                })
-            },
-
             /**
              *
              */
@@ -116,7 +110,8 @@ define('X.Enumerable', ['X.Core'], function (X) {
                 from = Number(from)
                 from = isNaN(from) && 0
 
-                var index = -1, len = obj.length >>> 0,
+                var index = -1,
+                    len = obj.length >>> 0,
                     k = (from < 0 ? Math.max(0, len + from) : from)
 
                 for (; k < len; ++k) {
@@ -144,6 +139,10 @@ define('X.Enumerable', ['X.Core'], function (X) {
                 }
 
                 return index
+            },
+
+            contains: function (obj, el) {
+                return X.indexOf(obj, el) !== -1
             },
 
             every: function (obj, fn, context) {
@@ -180,6 +179,20 @@ define('X.Enumerable', ['X.Core'], function (X) {
          * @method forEach
          */
         X.forEach = X.Enumerable.forEach
+
+        /**
+         * Alias for {@link X.Enumerable#contians X.Enumerable.contains}
+         * @member X
+         * @method contains
+         */
+        X.contains = X.Enumerable.contains
+
+        /**
+         * Alias for {@link X.Enumerable#contians X.Enumerable.contains}
+         * @member X
+         * @method include
+         */
+        X.include = X.contains
 
         return X.Enumerable
     }

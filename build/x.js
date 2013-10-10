@@ -1,4 +1,4 @@
-/*! x - v0.0.0 - 2013-09-10 */
+/*! x - v0.0.0 - 2013-10-10 */
 //TODO: X.bind deal with new operator
 
 (function (global, alias) {
@@ -152,16 +152,35 @@ define('X.Enumerable', ['X.Core'], function (X) {
         X.Enumerable = {
 
             /**
-             * @method forEach 待添加
+             * executes the provided iterator once for each element
+             * of the array/object with an assigned value.
+             * It is not invoked for indexes which have been deleted or
+             * which have been initialized to undefined.
+             *
+             * @method forEach
              * @member X.Enumerable
-             * @param obj
-             * @param iterator
+             *
+             * @param {Array | Object} obj
+             * The object or array to be iterated
+             *
+             * @param {Function} iterator
+             * Function to execute for each element
+             * @param iterator.item
+             * The item at the current `index` in the passed `object` or `array`
+             * @param iterator.index
+             * The current `index` or `key` within the `array` or `object`
+             * @param iterator.obj
+             * The `array` or `object` itself which was passed as the first argument
+             *
              * @param context
+             * Object to use as **this** when executing **iterator**
+             *
              * @returns {*}
              */
             forEach: function (obj, iterator, context) {
+
                 if (obj === null) {
-                    return
+                    throw new TypeError("obj is null or not defined")
                 }
 
                 if (nativeEach && obj.forEach === nativeEach) {
@@ -199,12 +218,6 @@ define('X.Enumerable', ['X.Core'], function (X) {
 
             },
 
-            each: function (obj, iterator, context) {
-                X.forEach(obj, function (v, i, obj) {
-                    return iterator.apply(context, i, v, obj)
-                })
-            },
-
             /**
              *
              */
@@ -218,7 +231,8 @@ define('X.Enumerable', ['X.Core'], function (X) {
                 from = Number(from)
                 from = isNaN(from) && 0
 
-                var index = -1, len = obj.length >>> 0,
+                var index = -1,
+                    len = obj.length >>> 0,
                     k = (from < 0 ? Math.max(0, len + from) : from)
 
                 for (; k < len; ++k) {
@@ -246,6 +260,10 @@ define('X.Enumerable', ['X.Core'], function (X) {
                 }
 
                 return index
+            },
+
+            contains: function (obj, el) {
+                return X.indexOf(obj, el) !== -1
             },
 
             every: function (obj, fn, context) {
@@ -282,6 +300,20 @@ define('X.Enumerable', ['X.Core'], function (X) {
          * @method forEach
          */
         X.forEach = X.Enumerable.forEach
+
+        /**
+         * Alias for {@link X.Enumerable#contians X.Enumerable.contains}
+         * @member X
+         * @method contains
+         */
+        X.contains = X.Enumerable.contains
+
+        /**
+         * Alias for {@link X.Enumerable#contians X.Enumerable.contains}
+         * @member X
+         * @method include
+         */
+        X.include = X.contains
 
         return X.Enumerable
     }
