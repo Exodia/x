@@ -51,7 +51,7 @@ module.exports = function (grunt) {
                 browsers: ['PhantomJS']
             },
             continuous: {
-                browsers: ['Chrome', 'Firefox', 'Safari', 'Opera', 'iOS']
+                browsers: ['Chrome', 'Firefox', 'Safari', 'Opera']
             },
             dev: {
                 reporters: ['spec', 'coverage']
