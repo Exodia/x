@@ -172,7 +172,7 @@ define('X.Enumerable', ['X.Core'], function (X) {
              * @param iterator.obj
              * The `array` or `object` itself which was passed as the first argument
              *
-             * @param context
+             * @param [context]
              * Object to use as **this** when executing **iterator**
              *
              * @returns {*}
@@ -295,25 +295,29 @@ define('X.Enumerable', ['X.Core'], function (X) {
         }
 
         /**
+         * Alias for {@link X.Enumerable#contians X.Enumerable.contains}
+         * @member X
+         * @method include
+         */
+        X.Enumerable.include = X.Enumerable.contains
+
+
+        /**
          * Alias for {@link X.Enumerable#forEach X.Enumerable.forEach}
          * @member X
          * @method forEach
          */
-        X.forEach = X.Enumerable.forEach
 
         /**
          * Alias for {@link X.Enumerable#contians X.Enumerable.contains}
          * @member X
          * @method contains
          */
-        X.contains = X.Enumerable.contains
+        X.Enumerable.forEach(X.Enumerable, function (v, k, Enumerable) {
+            X.has(Enumerable, k) && (X[k] = v)
+        })
 
-        /**
-         * Alias for {@link X.Enumerable#contians X.Enumerable.contains}
-         * @member X
-         * @method include
-         */
-        X.include = X.contains
+
 
         return X.Enumerable
     }
