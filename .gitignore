@@ -4,6 +4,6 @@
 *.pid
 *.log
 .idea/
-coverage.html
+coverage/
 tmp/
 node_modules/

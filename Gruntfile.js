@@ -10,7 +10,7 @@ module.exports = function (grunt) {
                     '<%= grunt.template.today("yyyy-mm-dd") %> */\n'
             },
             dist: {
-                src: ['src/core.js', 'src/enumerable.js', 'src/class.js', 'src/promise.js'],
+                src: ['src/core.js', 'src/enumerable.js', 'src/class.js'],
                 dest: 'build/<%= pkg.name %>.js'
             }
         },
