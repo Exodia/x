@@ -16,9 +16,10 @@
 <script src="core/test-core.js"></script>
 <script src="class/test-base.js"></script>
 <script src="class/test-inherit.js"></script>
-<script src="enumerable/test-enumerable.js"></script>
+<script src="enumerable/test-foreach.js"></script>
+<script src="enumerable/test-every.js"></script>
 <script>
-    mocha.checkLeaks();
+//    mocha.checkLeaks();
     mocha.globals(['X']);
     if (window.mochaPhantomJS) {
         mochaPhantomJS.run()
