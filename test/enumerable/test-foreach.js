@@ -51,20 +51,9 @@ describe('X.Enumberable.forEach Test', function () {
     })
     equal(answers, 0, 'handles a null properly')
 
-    X.forEach([1,2,3], function (num, index, arr) {
+    X.forEach([1, 2, 3], function (num, index, arr) {
         arr.splice(0, arr.length)
         ++answers
     })
     equal(answers, 1, 'dynamic remove element in array')
-
-    var arr = [1, 2, 3]
-    arr.forEach = null
-    answers = 0
-    X.forEach(arr, function () {
-        arr.splice(0, arr.length)
-        ++answers
-    })
-    equal(answers, 1, 'hack native forEach and dynamic remove element in array')
-
-
 })

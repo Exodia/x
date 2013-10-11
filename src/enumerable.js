@@ -25,6 +25,7 @@ define('X.Enumerable', ['X.Core'], function (X) {
 
 
         var nativeEach = ArrayProto.forEach,
+            nativeEvery = ArrayProto.every,
             nativeIndexOf = ArrayProto.indexOf,
             nativeLastIndexOf = ArrayProto.lastIndexOf
 
@@ -145,10 +146,44 @@ define('X.Enumerable', ['X.Core'], function (X) {
                 return X.indexOf(obj, el) !== -1
             },
 
-            every: function (obj, fn, context) {
-                X.forEach(obj, function (v, i, obj) {
+            /**
+             * Returns true if all of the values in the list pass the iterator truth test.
+             * Delegates to the native method every, if present.
+             *
+             * @method every
+             * @member X.Enumerable
+             *
+             * @param {Array | Object} list
+             * The object or array to be iterated
+             *
+             * @param {Function} iterator
+             * Function to execute for each element
+             * @param iterator.item
+             * The item at the current `index` in the passed `object` or `array`
+             * @param iterator.index
+             * The current `index` or `key` within the `array` or `object`
+             * @param iterator.obj
+             * The `array` or `object` itself which was passed as the first argument
+             *
+             * @param {Object} [context]
+             * list to use as this when executing callback
+             *
+             * @return {Boolean}
+             */
+            every: function (list, iterator, context) {
+                if (nativeEvery && list.every === nativeEvery) {
+                    return list.every(iterator, context)
+                }
 
+                var ret = true
+                X.forEach(list, function (v, i, list) {
+                    if (!iterator.call(list, v, i, list)) {
+                        ret = false
+                        return Breaker
+                    }
                 })
+
+                return ret
             },
 
             filter: function () {
@@ -175,27 +210,24 @@ define('X.Enumerable', ['X.Core'], function (X) {
 
         /**
          * Alias for {@link X.Enumerable#contians X.Enumerable.contains}
-         * @member X
+         * @member X.Enumerable
          * @method include
          */
         X.Enumerable.include = X.Enumerable.contains
 
 
         /**
-         * Alias for {@link X.Enumerable#forEach X.Enumerable.forEach}
-         * @member X
-         * @method forEach
+         * Alias for {@link X.Enumerable#every X.Enumerable.every}
+         * @member X.Enumerable
+         * @method all
          */
+        X.Enumerable.all = X.Enumerable.every
 
-        /**
-         * Alias for {@link X.Enumerable#contians X.Enumerable.contains}
-         * @member X
-         * @method contains
-         */
+
+        //add short cuts
         X.Enumerable.forEach(X.Enumerable, function (v, k, Enumerable) {
             X.has(Enumerable, k) && (X[k] = v)
         })
-
 
 
         return X.Enumerable
