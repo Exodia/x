@@ -54,6 +54,13 @@ module.exports = function (grunt) {
             },
             dev: {
                 reporters: ['spec', 'coverage']
+            },
+            vie: {
+                browsers: ['IE - winXP']
+            },
+            win: {
+                browsers: ['IE'],
+                reporters: ['spec', 'coverage']
             }
         }
     });
@@ -68,4 +75,7 @@ module.exports = function (grunt) {
     grunt.registerTask('dev', ['concat', 'uglify', 'karma:dev'])
     grunt.registerTask('build', ['concat', 'uglify'])
     grunt.registerTask('test', ['karma:dev'])
+    grunt.registerTask('vie', ['karma:vie'])
+    grunt.registerTask('win', ['karma:win'])
+
 }

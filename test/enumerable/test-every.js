@@ -1,4 +1,5 @@
 describe('X.Enumberable.every Test', function () {
+
     function ok(v, des) {
         return it(des, function () {
             expect(v).to.be(true)
