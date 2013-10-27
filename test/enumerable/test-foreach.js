@@ -23,13 +23,17 @@ describe('X.Enumberable.forEach Test', function () {
     })
     equal(answers.join(', '), '1, 2, 3', 'aliased as "forEach"')
 
-    answers = []
     var obj = {one: 1, two: 2, three: 3}
     obj.constructor.prototype.four = 4
-    X.forEach(obj, function (value, key) {
-        answers.push(key)
+    
+    it('iterating over objects works, and ignores the object prototype.', function () {
+        var answers = []
+
+        X.forEach(obj, function (value, key) {
+            answers.push(key)
+        })
+        expect(answers.join(', ')).to.be('one, two, three')
     })
-    equal(answers.join(", "), 'one, two, three', 'iterating over objects works, and ignores the object prototype.')
     delete obj.constructor.prototype.four
 
     var answer = null
@@ -51,9 +55,9 @@ describe('X.Enumberable.forEach Test', function () {
     })
     equal(answers, 0, 'handles a null properly')
 
-    X.forEach([1, 2, 3], function (num, index, arr) {
+    /*X.forEach([1, 2, 3], function (num, index, arr) {
         arr.splice(0, arr.length)
         ++answers
     })
-    equal(answers, 1, 'dynamic remove element in array')
+    equal(answers, 1, 'dynamic remove element in array')*/
 })

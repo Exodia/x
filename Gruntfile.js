@@ -56,7 +56,7 @@ module.exports = function (grunt) {
                 reporters: ['spec', 'coverage']
             },
             vie: {
-                browsers: ['IE - winXP']
+                browsers: ['IE8 - WinXP']
             },
             win: {
                 browsers: ['IE'],

@@ -1,4 +1,4 @@
-/*! x - v0.0.0 - 2013-10-14 */
+/*! x - v0.0.0 - 2013-10-16 */
 //TODO: X.bind deal with new operator
 
 (function (global, alias) {
