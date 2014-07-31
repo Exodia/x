@@ -1,4 +1,4 @@
-/*! x - v0.0.0 - 2013-10-16 */
+/*! x - v0.0.0 - 2014-07-31 */
 //TODO: X.bind deal with new operator
 
 (function (global, alias) {
@@ -134,9 +134,7 @@ define('X.Enumerable', ['X.Core'], function (X) {
                 'valueOf'
             ]
 
-
         var Breaker = {}
-
 
         var ArrayProto = Array.prototype,
             ObjProto = Object.prototype,
@@ -144,16 +142,16 @@ define('X.Enumerable', ['X.Core'], function (X) {
 
         var hasOwnProperty = X.bind(ObjProto.hasOwnProperty)
 
-
         var nativeEach = ArrayProto.forEach,
             nativeEvery = ArrayProto.every,
+            nativeSome = ArrayProto.some,
             nativeIndexOf = ArrayProto.indexOf,
             nativeLastIndexOf = ArrayProto.lastIndexOf
 
         X.Enumerable = {
 
             /**
-             * executes the provided iterator once for each element
+             * executes the provided callback once for each element
              * of the array/object with an assigned value.
              * It is not invoked for indexes which have been deleted or
              * which have been initialized to undefined.
@@ -164,28 +162,28 @@ define('X.Enumerable', ['X.Core'], function (X) {
              * @param {Array | Object} obj
              * The object or array to be iterated
              *
-             * @param {Function} iterator
+             * @param {Function} callback
              * Function to execute for each element
-             * @param iterator.item
+             * @param callback.item
              * The item at the current `index` in the passed `object` or `array`
-             * @param iterator.index
+             * @param callback.index
              * The current `index` or `key` within the `array` or `object`
-             * @param iterator.obj
+             * @param callback.obj
              * The `array` or `object` itself which was passed as the first argument
              *
              * @param [context]
-             * Object to use as **this** when executing **iterator**
+             * Object to use as **this** when executing **callback**
              *
              * @returns {*}
              */
-            forEach: function (obj, iterator, context) {
+            forEach: function (obj, callback, context) {
 
                 if (obj === null) {
                     throw new TypeError("obj is null or not defined")
                 }
 
                 if (nativeEach && obj.forEach === nativeEach) {
-                    return obj.forEach(iterator, context)
+                    return obj.forEach(callback, context)
                 }
 
                 if (obj.length === +obj.length) {
@@ -194,14 +192,14 @@ define('X.Enumerable', ['X.Core'], function (X) {
                         //elements that are deleted are not visited
                         //reference:
                         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
-                        if (X.has(obj, i) && iterator.call(context, obj[i], i, obj === Breaker)) {
+                        if (X.has(obj, i) && callback.call(context, obj[i], i, obj === Breaker)) {
                             return
                         }
                     }
                 } else {
                     var k
                     for (k in obj) {
-                        if (X.has(obj, k) && iterator.call(context, obj[k], k, obj) === Breaker) {
+                        if (X.has(obj, k) && callback.call(context, obj[k], k, obj) === Breaker) {
                             return
                         }
                     }
@@ -210,7 +208,7 @@ define('X.Enumerable', ['X.Core'], function (X) {
                     if (hasEnumBug) {
                         for (var i = enumProperties.length - 1; i > -1; --i) {
                             k = enumProperties[i]
-                            if (X.has(obj, k) && iterator.call(context, obj[k], k, obj) === Breaker) {
+                            if (X.has(obj, k) && callback.call(context, obj[k], k, obj) === Breaker) {
                                 return
                             }
                         }
@@ -248,7 +246,7 @@ define('X.Enumerable', ['X.Core'], function (X) {
 
             lastIndexOf: function (obj, el, start) {
                 if (nativeLastIndexOf && obj.lastIndexOf === nativeLastIndexOf) {
-                    return obj.LastIndexOf(el, start)
+                    return obj.lastIndexOf(el, start)
                 }
 
                 var index = -1, i = +obj.length || 0
@@ -268,22 +266,22 @@ define('X.Enumerable', ['X.Core'], function (X) {
             },
 
             /**
-             * Returns true if all of the values in the list pass the iterator truth test.
+             * Returns true if all of the values in the list pass the callback truth test.
              * Delegates to the native method every, if present.
              *
              * @method every
              * @member X.Enumerable
              *
-             * @param {Array | Object} list
+             * @param {Array | Object} obj
              * The object or array to be iterated
              *
-             * @param {Function} iterator
+             * @param {Function} callback
              * Function to execute for each element
-             * @param iterator.item
+             * @param callback.item
              * The item at the current `index` in the passed `object` or `array`
-             * @param iterator.index
+             * @param callback.index
              * The current `index` or `key` within the `array` or `object`
-             * @param iterator.obj
+             * @param callback.obj
              * The `array` or `object` itself which was passed as the first argument
              *
              * @param {Object} [context]
@@ -291,14 +289,14 @@ define('X.Enumerable', ['X.Core'], function (X) {
              *
              * @return {Boolean}
              */
-            every: function (list, iterator, context) {
-                if (nativeEvery && list.every === nativeEvery) {
-                    return list.every(iterator, context)
+            every: function (obj, callback, context) {
+                if (nativeEvery && obj.every === nativeEvery) {
+                    return obj.every(callback, context)
                 }
 
                 var ret = true
-                X.forEach(list, function (v, i, list) {
-                    if (!iterator.call(list, v, i, list)) {
+                X.forEach(obj, function (v, i, obj) {
+                    if (!callback.call(obj, v, i, obj)) {
                         ret = false
                         return Breaker
                     }
@@ -311,21 +309,46 @@ define('X.Enumerable', ['X.Core'], function (X) {
 
             },
 
-            some: function () {
+            /**
+             * Tests whether some element in the object/array
+             * passes the test implemented by the provided function.
+             *
+             * @param {Array | Object} obj
+             * the object/array to be tested
+             *
+             * @param {Function} callback
+             * the test function
+             *
+             * @param {Object} context
+             * the context of the test function
+             *
+             * @returns {boolean}
+             */
+            some: function (obj, callback, context) {
+                if (nativeSome && obj.some === nativeSome) {
+                    return obj.some(callback, context)
+                }
 
+                return !X.every(obj, function (el, index, obj) {
+                    return !callback.call(context, el, index, obj)
+                })
             },
 
-
-            reduce: function () {
-
+            reduce: function (obj, callback, initValue) {
+                initValue = initValue || obj[0] || 0
+                
             },
 
             reduceRight: function () {
 
             },
 
-            map: function () {
-
+            map: function (obj, callback, context) {
+                var result = []
+                X.forEach(obj, function (el, index, obj) {
+                    result.push(callback.call(context, el, index, obj))
+                })
+                return result
             }
         }
 
@@ -416,7 +439,7 @@ define('X.Class', ['X.Core'], function (X) {
         return Class.create.apply(Class, slice.call(arguments))
     }
 
-    apply(Class, {
+    X.extend(Class, {
         /**
          * Return a X.Class instance function, equal new Class(Super, overrides)
          * @method create
@@ -642,4 +665,241 @@ define('X.Class', ['X.Core'], function (X) {
     X.Class = Class
 
     return Class
+});
+/**
+ * @file An implement of Promise/A+
+ * @see http://promises-aplus.github.io/promises-spec/
+ * @author exodia(d_xinxin@163.com)
+ * Date: 13-9-9
+ * Time: 上午11:01
+ */
+
+X.define('X.Promise', ['X.Core', 'X.Class', 'X.Enumerable'], function (X, Class) {
+    var PENDING = 'pending',
+        FULFILLED = 'fulfilled',
+        REJECTED = 'rejected'
+
+
+    var setImmediate = typeof setImmediate === 'function'
+        ? function (fn) { setImmediate(fn); }
+        : function (fn) { setTimeout(fn, 0); };
+
+    var connect = function (promise1, promise2) {
+        promise1.then(
+            function (val) { promise2.resolve(val) },
+            function (val) { promise2.reject(val) }
+        )
+    }
+
+    var isPromise = function (obj) {
+        return obj && typeof obj === 'object' && typeof obj.then === 'function'
+    }
+
+    var createHandler = function (originPromise, newPromise, callback, type) {
+        return function (value) {
+            try {
+                if (typeof callback === 'function') {
+                    // callback 为函数，处理好后未发生错误，则应该为设置下个 promise 为 resolve 状态
+                    value = callback(value)
+                    type = 'resolve'
+                }
+                // callback 不为函数，则传递给下一个 promise
+                isPromise(value) ? connect(value, newPromise) : newPromise[type](value)
+            } catch (e) {
+                newPromise.reject(e)
+            }
+        }
+    }
+
+    var exec = function (promise) {
+        if (promise._status === PENDING) {
+            return
+        }
+
+        var callbacks = null
+        if (promise._status === FULFILLED) {
+            //spec 3.2.2.3
+            promise._rejectedCallbacks = []
+            callbacks = promise._fulfilledCallbacks
+        } else {
+            //spec 3.2.3.3
+            promise._fulfilledCallbacks = []
+            callbacks = promise._rejectedCallbacks
+        }
+
+        setImmediate(function () {
+            var callback,
+                val = promise._value
+
+            //spec 3.2.5
+            while (callback = callbacks.shift()) { //spec 3.2.2.2, 3.2.3.2
+                callback(val)
+            }
+        })
+    }
+
+    /**
+     * @class X.Promise
+     */
+    X.Promise = Class({
+        constructor: function () {
+            if (!(this instanceof X.Promise)) {
+                return new X.Promise()
+            }
+
+            this.$super(arguments)
+
+            this._status = PENDING
+            this._value = undefined
+            this._fulfilledCallbacks = []
+            this._rejectedCallbacks = []
+        },
+
+
+        /**
+         * The status of the current promise,
+         * the value is one of the "pending", "fulfilled", "rejected"
+         * @property {String} _status
+         * @private
+         * @member X.Promise
+         *
+         */
+        _status: null,
+
+        _value: undefined,
+
+        _fulfilledCallbacks: null,
+
+        _rejectedCallbacks: null,
+
+        /* _asyncExec: function () {
+         var promise = this
+         if (promise._status === PENDING) {
+         return
+         }
+
+
+         var phs = null
+         if (promise._status === FULFILLED) {
+         //spec 3.2.2.3
+         promise._rejectedCallbacks = []
+         phs = promise._fulfilledCallbacks
+         } else {
+         //spec 3.2.3.3
+         promise._fulfilledCallbacks = []
+         phs = promise._rejectedCallbacks
+         }
+
+         setTimeout(function () {
+         var ph,
+         val = promise._value
+
+         //spec 3.2.5
+         while (ph = phs.shift()) { //spec 3.2.2.2, 3.2.3.2
+         if (typeof ph.handler !== 'function') { //spec spec 3.2.1
+         //spec 3.2.6.4, 3.2.6.5
+         ph.promise[promise._status === FULFILLED ? 'resolve' : 'reject'](val)
+         continue
+         }
+
+         try {
+         //spec 3.2.2.1, 3.2.3.1
+         var returnVal = ph.handler(val)
+         // 这样判断是否为 promise 实例，我是不太赞同的，
+         // 但是标准测试用例会伪造一个 promise，
+         //                        returnVal instanceof X.Promise
+         returnVal && typeof returnVal.then === 'function'
+         ? connect(returnVal, ph.promise) //spec 3.2.6.3
+         : ph.promise.resolve(returnVal) //spec 3.2.6.1
+
+         } catch (e) {
+         //spec 3.2.6.2
+         ph.promise.reject(e)
+         }
+         }
+         }, 0)
+         },*/
+
+        /**
+         * Adds a fulfilledHandler, rejectedHandler,
+         * and progressHandler to be called for completion of a promise.
+         * The fulfilledHandler is called when the promise is fulfilled.
+         * The rejectedHandler is called when a promise fails.
+         * The progressHandler is called for progress events.
+         *
+         * @method then
+         * @member X.Promise
+         * @param {Function} [fulfilledHandler]
+         * @param {Function} [rejectedHandler]
+         * @return {X.Promise}
+         */
+        then: function (fulfilledHandler, rejectedHandler) {
+            var promise = X.Promise()
+
+            this._fulfilledCallbacks.push(createHandler(this, promise, fulfilledHandler, 'resolve'))
+            this._rejectedCallbacks.push(createHandler(this, promise, rejectedHandler, 'reject'))
+
+            exec(this)
+            //spec 3.2.4, 3.2.6
+            return promise
+        },
+
+        /**
+         * @method
+         * @member X.Promise
+         * @param {Function} fulfilledHandler
+         * @returns {X.Promise}
+         */
+        done: function (fulfilledHandler) {
+            return this.then(fulfilledHandler)
+        },
+
+        /**
+         * @method
+         * @member X.Promise
+         * @param {Function} errorHandler
+         * @returns {X.Promise}
+         */
+        fail: function (errorHandler) {
+            return this.then(null, errorHandler)
+
+        },
+
+        always: function (handler) {
+            return this.then(handler, handler)
+        },
+
+        resolve: function (val) {
+            //spec 3.1
+            if (this._status !== PENDING) {
+                throw Error(
+                        'promise is not in ' + PENDING
+                        + ' so can not resolve!'
+                )
+            }
+
+            //spec 3.2.2.1
+            this._value = val
+            this._status = FULFILLED
+            exec(this)
+        },
+
+        reject: function (reason) {
+            //spec 3.1
+            if (this._status !== PENDING) {
+                throw Error(
+                        'promise is not in ' + PENDING
+                        + ' so can not resolve!'
+                )
+            }
+
+            //spec 3.2.3.1
+            this._value = reason
+            this._status = REJECTED
+            exec(this)
+        }
+
+    })
+
+    return X.Promise
 })

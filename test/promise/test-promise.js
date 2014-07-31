@@ -1,4 +1,4 @@
-var X = require('../../build/x')
+var X = require(__dirname + '/../../build/x')
 var promisesAplusTests = require("promises-aplus-tests")
 
 var adapter = {

@@ -13,9 +13,7 @@ define('X.Enumerable', ['X.Core'], function (X) {
                 'valueOf'
             ]
 
-
         var Breaker = {}
-
 
         var ArrayProto = Array.prototype,
             ObjProto = Object.prototype,
@@ -23,16 +21,16 @@ define('X.Enumerable', ['X.Core'], function (X) {
 
         var hasOwnProperty = X.bind(ObjProto.hasOwnProperty)
 
-
         var nativeEach = ArrayProto.forEach,
             nativeEvery = ArrayProto.every,
+            nativeSome = ArrayProto.some,
             nativeIndexOf = ArrayProto.indexOf,
             nativeLastIndexOf = ArrayProto.lastIndexOf
 
         X.Enumerable = {
 
             /**
-             * executes the provided iterator once for each element
+             * executes the provided callback once for each element
              * of the array/object with an assigned value.
              * It is not invoked for indexes which have been deleted or
              * which have been initialized to undefined.
@@ -43,28 +41,28 @@ define('X.Enumerable', ['X.Core'], function (X) {
              * @param {Array | Object} obj
              * The object or array to be iterated
              *
-             * @param {Function} iterator
+             * @param {Function} callback
              * Function to execute for each element
-             * @param iterator.item
+             * @param callback.item
              * The item at the current `index` in the passed `object` or `array`
-             * @param iterator.index
+             * @param callback.index
              * The current `index` or `key` within the `array` or `object`
-             * @param iterator.obj
+             * @param callback.obj
              * The `array` or `object` itself which was passed as the first argument
              *
              * @param [context]
-             * Object to use as **this** when executing **iterator**
+             * Object to use as **this** when executing **callback**
              *
              * @returns {*}
              */
-            forEach: function (obj, iterator, context) {
+            forEach: function (obj, callback, context) {
 
                 if (obj === null) {
                     throw new TypeError("obj is null or not defined")
                 }
 
                 if (nativeEach && obj.forEach === nativeEach) {
-                    return obj.forEach(iterator, context)
+                    return obj.forEach(callback, context)
                 }
 
                 if (obj.length === +obj.length) {
@@ -73,14 +71,14 @@ define('X.Enumerable', ['X.Core'], function (X) {
                         //elements that are deleted are not visited
                         //reference:
                         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
-                        if (X.has(obj, i) && iterator.call(context, obj[i], i, obj === Breaker)) {
+                        if (X.has(obj, i) && callback.call(context, obj[i], i, obj === Breaker)) {
                             return
                         }
                     }
                 } else {
                     var k
                     for (k in obj) {
-                        if (X.has(obj, k) && iterator.call(context, obj[k], k, obj) === Breaker) {
+                        if (X.has(obj, k) && callback.call(context, obj[k], k, obj) === Breaker) {
                             return
                         }
                     }
@@ -89,7 +87,7 @@ define('X.Enumerable', ['X.Core'], function (X) {
                     if (hasEnumBug) {
                         for (var i = enumProperties.length - 1; i > -1; --i) {
                             k = enumProperties[i]
-                            if (X.has(obj, k) && iterator.call(context, obj[k], k, obj) === Breaker) {
+                            if (X.has(obj, k) && callback.call(context, obj[k], k, obj) === Breaker) {
                                 return
                             }
                         }
@@ -127,7 +125,7 @@ define('X.Enumerable', ['X.Core'], function (X) {
 
             lastIndexOf: function (obj, el, start) {
                 if (nativeLastIndexOf && obj.lastIndexOf === nativeLastIndexOf) {
-                    return obj.LastIndexOf(el, start)
+                    return obj.lastIndexOf(el, start)
                 }
 
                 var index = -1, i = +obj.length || 0
@@ -147,22 +145,22 @@ define('X.Enumerable', ['X.Core'], function (X) {
             },
 
             /**
-             * Returns true if all of the values in the list pass the iterator truth test.
+             * Returns true if all of the values in the list pass the callback truth test.
              * Delegates to the native method every, if present.
              *
              * @method every
              * @member X.Enumerable
              *
-             * @param {Array | Object} list
+             * @param {Array | Object} obj
              * The object or array to be iterated
              *
-             * @param {Function} iterator
+             * @param {Function} callback
              * Function to execute for each element
-             * @param iterator.item
+             * @param callback.item
              * The item at the current `index` in the passed `object` or `array`
-             * @param iterator.index
+             * @param callback.index
              * The current `index` or `key` within the `array` or `object`
-             * @param iterator.obj
+             * @param callback.obj
              * The `array` or `object` itself which was passed as the first argument
              *
              * @param {Object} [context]
@@ -170,14 +168,14 @@ define('X.Enumerable', ['X.Core'], function (X) {
              *
              * @return {Boolean}
              */
-            every: function (list, iterator, context) {
-                if (nativeEvery && list.every === nativeEvery) {
-                    return list.every(iterator, context)
+            every: function (obj, callback, context) {
+                if (nativeEvery && obj.every === nativeEvery) {
+                    return obj.every(callback, context)
                 }
 
                 var ret = true
-                X.forEach(list, function (v, i, list) {
-                    if (!iterator.call(list, v, i, list)) {
+                X.forEach(obj, function (v, i, obj) {
+                    if (!callback.call(obj, v, i, obj)) {
                         ret = false
                         return Breaker
                     }
@@ -190,21 +188,46 @@ define('X.Enumerable', ['X.Core'], function (X) {
 
             },
 
-            some: function () {
+            /**
+             * Tests whether some element in the object/array
+             * passes the test implemented by the provided function.
+             *
+             * @param {Array | Object} obj
+             * the object/array to be tested
+             *
+             * @param {Function} callback
+             * the test function
+             *
+             * @param {Object} context
+             * the context of the test function
+             *
+             * @returns {boolean}
+             */
+            some: function (obj, callback, context) {
+                if (nativeSome && obj.some === nativeSome) {
+                    return obj.some(callback, context)
+                }
 
+                return !X.every(obj, function (el, index, obj) {
+                    return !callback.call(context, el, index, obj)
+                })
             },
 
-
-            reduce: function () {
-
+            reduce: function (obj, callback, initValue) {
+                initValue = initValue || obj[0] || 0
+                
             },
 
             reduceRight: function () {
 
             },
 
-            map: function () {
-
+            map: function (obj, callback, context) {
+                var result = []
+                X.forEach(obj, function (el, index, obj) {
+                    result.push(callback.call(context, el, index, obj))
+                })
+                return result
             }
         }
 

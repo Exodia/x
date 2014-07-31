@@ -60,7 +60,7 @@ define('X.Class', ['X.Core'], function (X) {
         return Class.create.apply(Class, slice.call(arguments))
     }
 
-    apply(Class, {
+    X.extend(Class, {
         /**
          * Return a X.Class instance function, equal new Class(Super, overrides)
          * @method create
